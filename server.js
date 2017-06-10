@@ -22,13 +22,14 @@ app.set('view engine', 'ejs');
 app.engine('html', ejs);
 
 app.get('/', (req, res) => {
-  res.render('signin.html');
+
+  res.render('home.html');
 });
 app.get('/signup', (req, res) => {
   res.render('signup.html');
 });
-app.get('/home', (req, res) => {
-  res.render('home.html');
+app.get('/signin', (req, res) => {
+  res.render('signin.html');
 });
 app.post('/signup', function(req, res) {
     var u = new User({
@@ -41,30 +42,19 @@ app.post('/signup', function(req, res) {
       console.log('Se guardó el usario');
     });
 
-    res.redirect('/home');
+    res.redirect('/signin');
 });
-app.post('/', function(req, res) {
+app.post('/signin', function(req, res) {
   User.findOne({ email: req.body.email }, (err, user) => {
     if (err) throw err;
-    if (!user) {
-      console.log('Authentication failed. User not found.');
-    } else if (user) {
-      if (user.password != req.body.password) {
-        console.log('Authentication failed. Wrong password.');
-      } else {
-        console.log('llegué a los webTokens')
-        var token = jwt.sign(user, app.get('secretKey'), {
-          expiresIn: 60*60*24 // expires in 24 hours
-        });
-        res.redirect('/home');
-      }
+    else if (user && user.password == req.body.password) {
+      var token = jwt.sign(user, app.get('secretKey'), {
+        expiresIn: 60 * 60 * 24
+      });
+      res.redirect('/');
     }
   });
 });
-
-
-
-
 
 app.listen(port, (err) => {
   if(err) throw err;
