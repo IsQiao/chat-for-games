@@ -6,55 +6,33 @@ var express = require('express');
     jwt = require('jsonwebtoken');
     mongoose = require('mongoose');
     config = require('./config');
-    User = require('./models/user');
+    index = require('./routes/index');
+    signin = require('./routes/signin');
+    signup = require('./routes/signup');
 
+//port config
 const port = process.env.PORT || 3000;
+
+//database and json web tokens config
 mongoose.connect(config.database);
 app.set('secretKey', config.secret);
 
+//static files config
 app.use(express.static(path.join(__dirname, 'public')));
 
+//body parser config
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+//views config
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.engine('html', ejs);
 
-app.get('/', (req, res) => {
-
-  res.render('home.html');
-});
-app.get('/signup', (req, res) => {
-  res.render('signup.html');
-});
-app.get('/signin', (req, res) => {
-  res.render('signin.html');
-});
-app.post('/signup', function(req, res) {
-    var u = new User({
-      email: req.body.email,
-      password: req.body.password
-    });
-
-    u.save((err) => {
-      if(err) throw err;
-      console.log('Se guardó el usario');
-    });
-
-    res.redirect('/signin');
-});
-app.post('/signin', function(req, res) {
-  User.findOne({ email: req.body.email }, (err, user) => {
-    if (err) throw err;
-    else if (user && user.password == req.body.password) {
-      var token = jwt.sign(user, app.get('secretKey'), {
-        expiresIn: 60 * 60 * 24
-      });
-      res.redirect('/');
-    }
-  });
-});
+//routes config
+app.use(index);
+app.use(signin);
+app.use(signup);
 
 app.listen(port, (err) => {
   if(err) throw err;
