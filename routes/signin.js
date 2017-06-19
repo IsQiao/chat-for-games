@@ -13,6 +13,7 @@ router.post('/signin', function(req, res) {
       var token = jwt.sign(user, app.get('secretKey'), {
         expiresIn: 60 * 60 * 24
       });
+      res.cookie('token', token);
       res.redirect('/');
     }
   });
